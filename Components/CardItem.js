@@ -4,11 +4,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {ThemeContext} from '../Context/AppCon'
 
 
+
 const CardItem = ({ item }) => {
   const context = useContext(ThemeContext);
-  useEffect(()=>{
-    console.log(item.mane);
-  })
+
 
   return (
     <View style={styles.item}>
