@@ -4,6 +4,8 @@
 
    import Item from '../Components/CardItem'
    import {ThemeContext} from '../Context/AppCon'
+   import { AntDesign } from '@expo/vector-icons'; 
+
 
 
 
@@ -12,10 +14,21 @@ export default function Home() {
 
   useEffect(()=>{
       console.log(context.Dateobj);
+
+      //console.log(now);
+
+      
   },[context.Dateobj])
 
-  const x = {'id':'001','name':'Anass',"date":'feb/12/22',"time":'22:10'}
-  
+  //get date now
+  var date = new Date().getDate(); //Current Date
+  var month = new Date().getMonth() + 1; //Current Month
+  var year = new Date().getFullYear(); //Current Year
+  var hours = new Date().getHours(); //Current Hours
+  var min = new Date().getMinutes(); //Current Minutes
+  var nowdate = date + '-' + month + '-' + year; 
+  var timenow = hours + ':' + min 
+
  
 
   //hide footer when Keyboard open 
@@ -28,8 +41,21 @@ export default function Home() {
     setKeyboardIsOpen(false);
     
   });
-  const [text, onChangeText] = React.useState("");
+  const [fullname, onChangfullname] = useState("");
+
+  const x = {'id':nowdate+timenow+fullname ,'name':fullname,"date":nowdate,"time":timenow}
   
+ 
+ 
+  const handelClick =(item)=>{
+    
+    context.AddItem(item)
+    onChangfullname('')
+    Keyboard.dismiss()
+
+  }
+
+
 
   //Flat list 
   const renderItem = ({ item }) => (
@@ -45,27 +71,14 @@ export default function Home() {
                     <SafeAreaView>
                                 <TextInput
                                   style={styles.input}
-                                  onChangeText={onChangeText}
-                                  value={text}
-                                  placeholder="useless placeholder"
+                                  onChangeText={onChangfullname}
+                                  value={fullname}
+                                  placeholder="fullname"
                                   placeholderTextColor="#fff" 
                                 />
-                                 <TextInput
-                                  style={styles.input}
-                                  onChangeText={onChangeText}
-                                  value={text}
-                                  placeholder="useless placeholder"
-                                  placeholderTextColor="#fff" 
-                                />
-                                  <TextInput
-                                  style={styles.input}
-                                  onChangeText={onChangeText}
-                                  value={text}
-                                  placeholder="useless placeholder"
-                                  placeholderTextColor="#fff" 
-                                />
+                            
                                 
-                                <Pressable style={styles.button} onPress={()=>{context.AddItem(x)}}>
+                                <Pressable style={styles.button} onPress={()=>{ handelClick(x) }}>
                                 <Text style={styles.text}>Add</Text>
                               </Pressable>
                       </SafeAreaView>
@@ -73,36 +86,27 @@ export default function Home() {
                 </View>
           { !keyboardIsOpen &&  <View style={styles.body}>
                   <SafeAreaView style={styles.container}>
-                        <FlatList
-                          data={context.DATA}
-                          renderItem={renderItem}
-                          keyExtractor={item => item.id}
-                          showsVerticalScrollIndicator ={false}
-                          showsHorizontalScrollIndicator={false}
-                        />
+                  {
+                    
+                    context.Dateobj.length > 0  ?
+                    <FlatList
+                    data={context.Dateobj}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    showsVerticalScrollIndicator ={false}
+                    showsHorizontalScrollIndicator={false}
+                  />:
+                  <View style={styles.homeicone}>
+                        <AntDesign name="pluscircleo" size={65} color='#2d5173' />
+                  </View>
+                  }
+                      
                       </SafeAreaView>
               </View>}
             
        </View>
     )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -192,6 +196,13 @@ const styles = StyleSheet.create({
       marginRight:12,
       
       paddingBottom:70
+    },
+    homeicone:{
+        opacity:0.8,
+        marginTop:'30%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        top:'20%'
     }
   
 })

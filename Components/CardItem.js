@@ -1,20 +1,23 @@
 import { StyleSheet, Text, View,Pressable } from 'react-native'
-import React,{useContext} from 'react'
+import React,{useContext, useEffect} from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import {ThemeContext} from '../Context/AppCon'
 
 
 const CardItem = ({ item }) => {
   const context = useContext(ThemeContext);
+  useEffect(()=>{
+    console.log(item.mane);
+  })
 
   return (
     <View style={styles.item}>
       
-      <Text  style={styles.itemtitel}>you have meeting with  {item.title}  </Text>
-      <Text style={styles.itemDate}>Date : fev-12-2022                time : 19.30 </Text> 
+      <Text  style={styles.itemtitel}>you have meeting with {item.name}  </Text>
+      <Text style={styles.itemDate}>Date : {item.date}                  time : {item.time}   </Text> 
 
       <View style={styles.close}>
-          <Pressable  onPress={()=>context.Remove('Anass')}>
+          <Pressable  onPress={()=>context.Remove(item.id)}>
       <MaterialCommunityIcons name="delete" size={32} color="#FFF"  style={styles.closeIcon} />
       </Pressable>
       </View>
