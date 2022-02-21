@@ -1,13 +1,20 @@
     import React,{useContext, useEffect,useState} from 'react'
     import { StyleSheet, Text, View,TouchableOpacity,Pressable,
       SafeAreaView,  TextInput ,Keyboard ,FlatList,ScrollView} from 'react-native'
-
    import Item from '../Components/CardItem'
    import {ThemeContext} from '../Context/AppCon'
    import { AntDesign } from '@expo/vector-icons'; 
    import DateTimePicker from '@react-native-community/datetimepicker';
+   import * as Notifications from 'expo-notifications';
 
 
+   Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
 
 
 export default function Home() {
@@ -17,11 +24,10 @@ export default function Home() {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
+
+// get Date and time from piker
   const [SelectedDate, setSelectedDate] = useState();
   const [SelectedTime, setSelectedTime] = useState();
-
-  
-
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
@@ -31,45 +37,22 @@ export default function Home() {
   var year =  currentDate.getFullYear(); //Current Year
   var hours = currentDate.getHours(); //Current Hours
   var min = currentDate.getMinutes(); //Current Minutes
-  var selectDate = Ndate + '-' + month + '-' + year; 
+  var selectDate = Ndate + '/' + month + '/' + year; 
   var selectestime = hours + ':' + min 
   setSelectedDate(selectDate)
   setSelectedTime(selectestime)
-    //console.log(selectDate , selectestime);
 
   };
-
   const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
   };
-
   const showDatepicker = () => {
     showMode('date');
   };
-
   const showTimepicker = () => {
     showMode('time');
   };
-
-  useEffect(()=>{
-      //console.log(context.Dateobj);
-      
-      //console.log(now);
-
-      
-  },[context.Dateobj])
-
-  //get date now
-  var Ndate = new Date().getDate(); //Current Date
-  var month = new Date().getMonth() + 1; //Current Month
-  var year = new Date().getFullYear(); //Current Year
-  var hours = new Date().getHours(); //Current Hours
-  var min = new Date().getMinutes(); //Current Minutes
-  var nowdate = Ndate + '-' + month + '-' + year; 
-  var timenow = hours + ':' + min 
-
- 
 
   //hide footer when Keyboard open 
   const [keyboardIsOpen, setKeyboardIsOpen] = useState(false);
@@ -84,23 +67,66 @@ export default function Home() {
   
   
  
- //add btn
-  const handelClick =(name,Date,Time)=>{
+ //onclick add btn 
+  const handelClick =(name,DateS,Time)=>{
     if (name !== '' ) {
-    const meeting = {'id':name+Date+Time ,'name':name,"date":Date,"time":Time}
+      //console.log('SelectedDate:',new Date(date));
+      //console.log('nowdate:',new Date().getTime());
+      var d1 = new Date(date) //firstDate
+      var d2 = new Date().getTime() //SecondDate
+      var diff = Math.abs((d1-d2 )/ (1000 * 60 * 60 )); //in milliseconds
+      var myInt = parseInt(diff);
+      var Nhoure =myInt-1
+      //console.log("diff :",Nhoure);
+    const meeting = {'id':name+DateS+Time ,'name':name,"date":DateS,"time":Time,Nhoure :Nhoure }
     context.AddItem(meeting)
     onChangfullname('')
+    setSelectedDate()
+   setSelectedTime()
     Keyboard.dismiss()
-  }
 
-  }
+  
 
+   
+  } }
 
+  //get date now
+  var Ndate = new Date().getDate(); //Current Date
+  var month = new Date().getMonth() + 1; //Current Month
+  var year = new Date().getFullYear(); //Current Year
+  var hours = new Date().getHours(); //Current Hours
+  var min = new Date().getMinutes(); //Current Minutes
+  var nowdate = Ndate + '/' + month + '/' + year; 
+  var timenow = hours + ':' + min 
 
-  //Flat list 
+  useEffect(()=>{
+    if (context.Dateobj.length > 0) {
+      var item = context.Dateobj.reduce(function(prev, curr) {
+        return prev.Nhoure < curr.Nhoure ? prev : curr;
+    });
+  
+      
+   
+    console.log("item :", item.name); 
+  
+    Notifications.scheduleNotificationAsync({
+      content: {
+        title: "BETTER APPS",
+        body: 'you have meeting with '+item.name+' after 1h',
+      },
+      trigger: {
+        seconds:  item.Nhoure,
+      },
+    });
+   } 
+    
+  },[context.Dateobj])
+  
+  //Flat list render
   const renderItem = ({ item }) => (
     <Item item={item} />
   );
+
     return (
        <View style={styles.contener}>
             
@@ -144,25 +170,25 @@ export default function Home() {
 
                 </View>
                 </View>
-          { !keyboardIsOpen &&  <View style={styles.body}>
-                  <SafeAreaView style={styles.container}>
-                  {
-                    
-                    context.Dateobj.length > 0  ?
-                    <FlatList
-                    data={context.Dateobj}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.id}
-                    showsVerticalScrollIndicator ={false}
-                    showsHorizontalScrollIndicator={false}
-                  />:
-                  <View style={styles.homeicone}>
-                        <AntDesign name="pluscircleo" size={65} color='#2d5173' />
-                  </View>
-                  }
-                      
-                      </SafeAreaView>
-              </View>}
+                { !keyboardIsOpen &&  <View style={styles.body}>
+                        <SafeAreaView style={styles.container}>
+                        {
+                          
+                          context.Dateobj.length > 0  ?
+                          <FlatList
+                          data={context.Dateobj}
+                          renderItem={renderItem}
+                          keyExtractor={item => item.id}
+                          showsVerticalScrollIndicator ={false}
+                          showsHorizontalScrollIndicator={false}
+                        />:
+                        <View style={styles.homeicone}>
+                              <AntDesign name="pluscircleo" size={65} color='#2d5173' />
+                        </View>
+                        }
+                            
+                            </SafeAreaView>
+                    </View>}
             
        </View>
     )
